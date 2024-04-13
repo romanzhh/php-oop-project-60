@@ -29,16 +29,6 @@ class Validator
         return new ArrayValidator();
     }
 
-    public function addValidator(string $type, string $name, callable $fn)
-    {
-    }
-
-    public function test($name, $value)
-    {
-        $this->config->get($name);
-        return $this;
-    }
-
     public function required()
     {
         $this->config->set('required', true);
