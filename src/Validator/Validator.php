@@ -2,71 +2,62 @@
 
 namespace Hexlet\Validator;
 
-use Hexlet\Validator\ContainsValidation;
-use Hexlet\Validator\MinLengthValidation;
-use Hexlet\Validator\RequiredValidation;
-
 class Validator
 {
+    /**
+     * @var ValidatorConfig
+     */
     protected $config;
 
-    protected static $validations = [
-        'contains' => ContainsValidation::class,
-        'required' => RequiredValidation::class,
-        'min_length' => MinLengthValidation::class
-    ];
-
-    public function __construct(array $config = [])
+    public function __construct()
     {
-        $this->config = $config;
-        $this->initValidators();
-    }
-
-    public function initValidators()
-    {
-        array_walk(
-            self::$validations,
-            fn ($val, $key) => $this->$key = new $val()
-        );
+        $this->config = new ValidatorConfig();
     }
 
     public function string()
     {
-        return new static(array_merge([
-            'type' => 'string'
-        ], $this->config));
+        return new StringValidator();
+    }
+
+    public function number()
+    {
+        return new NumberValidator();
+    }
+
+    public function array()
+    {
+        return new ArrayValidator();
     }
 
     public function required()
     {
-        return new static(array_merge([
-            'required' => true
-        ], $this->config));
+        $this->config->set('required', true);
+        return $this;
     }
 
-    public function minLength(int $length)
+    public function validateRequired($data): bool
     {
-        return new static(array_merge([
-            'min_length' => $length
-        ], $this->config));
-    }
-
-    public function contains(string $str)
-    {
-        return new static(array_merge([
-            'contains' => $str
-        ], $this->config));
+        return !empty($data);
     }
 
     public function isValid($data): bool
     {
-        foreach ($this->config as $name => $value) {
-            $validator = $this->$name;
-            if (!$validator->validate($data, $value)) {
-                return false;
-            }
+        $config = $this->config->all();
+
+        if (!$config) {
+            return true;
         }
 
-        return true;
+        $methods = array_map(
+            fn ($name) => ('validate' . ucfirst($name)),
+            array_keys($config)
+        );
+
+        $exec = array_map(
+            fn ($method) => $this->$method($data),
+            $methods
+        );
+
+        return !in_array(false, $exec);
     }
 }
