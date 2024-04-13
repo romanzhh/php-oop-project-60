@@ -23,4 +23,12 @@ class ValidatorTest extends TestCase
         $schema = $validator->number();
         $this->assertTrue($schema->isValid(3));
     }
+
+    public function testArrayValidator(): void
+    {
+        $validator = new Validator();
+        $schema = $validator->array();
+        $this->assertTrue($schema->required()->sizeof(3)->isValid([1, 2, 3]));
+        $this->assertFalse($schema->sizeof(3)->isValid([1, 2]));
+    }
 }
