@@ -10,7 +10,6 @@ class ValidatorTest extends TestCase
     public function testStringValidator(): void
     {
         $validator = new Validator();
-        dd($validator->string()->number());
         $schema = $validator->string()->required();
         $this->assertTrue($schema->isValid('string'));
         $this->assertFalse($schema->isValid(''));
