@@ -31,4 +31,19 @@ class ValidatorTest extends TestCase
         $this->assertTrue($schema->required()->sizeof(3)->isValid([1, 2, 3]));
         $this->assertFalse($schema->sizeof(3)->isValid([1, 2]));
     }
+
+    public function testShapeValidator(): void
+    {
+        $validator = new Validator();
+        $schema = $validator->array();
+        $shape = [
+            'name' => $validator->string()->required(),
+            'age' => $validator->number()->positive(),
+        ];
+        $schema->shape($shape);
+        $this->assertTrue($schema->isValid(['name' => 'kolya', 'age' => 100]));
+        $this->assertFalse($schema->isValid(['name' => 'maya', 'age' => null]));
+        $this->assertFalse($schema->isValid(['name' => '', 'age' => null]));
+        $this->assertFalse($schema->isValid(['name' => 'ada', 'age' => -5]));
+    }
 }
