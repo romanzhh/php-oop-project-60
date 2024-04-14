@@ -56,7 +56,7 @@ class Validator
         $this->customValidators[$type][$name] = $fn;
     }
 
-    public function test($name, $value): static
+    public function test(string $name, mixed $value): static
     {
         $this->config->set($name, $value);
         return $this;
@@ -70,14 +70,14 @@ class Validator
 
     public function validateRequired(mixed $data): bool
     {
-        return $this->config->get('required') ? !empty($data) : true;
+        return $this->config->get('required') ? (bool) $data : true;
     }
 
     public function isValid(mixed $data): bool
     {
         $config = $this->config->all();
 
-        if (!$config) {
+        if (empty($config)) {
             return true;
         }
 
@@ -103,6 +103,6 @@ class Validator
             $base_methods
         ));
 
-        return !in_array(false, $exec);
+        return !in_array(false, $exec, false);
     }
 }

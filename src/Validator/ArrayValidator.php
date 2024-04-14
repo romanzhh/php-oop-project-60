@@ -9,7 +9,7 @@ class ArrayValidator extends Validator
         $this->config->set('shape', $array);
     }
 
-    public function sizeof(int $size): \Hexlet\Validator\ArrayValidator
+    public function sizeof(int $size): static
     {
         $this->config->set('size', $size);
         return $this;
@@ -22,7 +22,7 @@ class ArrayValidator extends Validator
 
     public function validateRequired(mixed $data): bool
     {
-        return $this->config->get('required') ? is_array($data) : true;
+        return ($this->config->get('required') && !is_array($data)) ? false : true;
     }
 
     public function validateShape(array $array): bool
