@@ -46,4 +46,20 @@ class ValidatorTest extends TestCase
         $this->assertFalse($schema->isValid(['name' => '', 'age' => null]));
         $this->assertFalse($schema->isValid(['name' => 'ada', 'age' => -5]));
     }
+
+    public function testCustomValidator(): void
+    {
+        $validator = new Validator();
+        $fn = fn ($value, $start) => str_starts_with($value, $start);
+        $validator->addValidator('string', 'startWith', $fn);
+        $schema = $validator->string()->test('startWith', 'H')->required();
+        $this->assertFalse($schema->isValid('exlet'));
+        $this->assertTrue($schema->isValid('Hexlet'));
+
+        $fn = fn ($value, $min) => $value >= $min;
+        $validator->addValidator('number', 'min', $fn);
+        $schema = $validator->number()->test('min', 5);
+        $this->assertFalse($schema->isValid(4));
+        $this->assertTrue($schema->isValid(6));
+    }
 }

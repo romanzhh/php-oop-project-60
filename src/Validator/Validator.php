@@ -4,29 +4,56 @@ namespace Hexlet\Validator;
 
 class Validator
 {
+    public const STRING_TYPE = 'string';
+
+    public const NUMBER_TYPE = 'number';
+
+    public const ARRAY_TYPE = 'array';
+
     /**
      * @var ValidatorConfig
      */
     protected $config;
 
-    public function __construct()
+    protected $customValidators;
+
+    public function __construct($customValidators = null, $config = null)
     {
-        $this->config = new ValidatorConfig();
+        $this->customValidators = $customValidators ?? [];
+        $this->config = $config ?? new ValidatorConfig();
     }
 
     public function string()
     {
-        return new StringValidator();
+        return new StringValidator(
+            $this->customValidators[self::STRING_TYPE] ?? []
+        );
     }
 
     public function number()
     {
-        return new NumberValidator();
+        return new NumberValidator(
+            $this->customValidators[self::NUMBER_TYPE] ?? []
+        );
     }
 
     public function array()
     {
-        return new ArrayValidator();
+        return new ArrayValidator(
+            $this->customValidators[self::ARRAY_TYPE] ?? []
+        );
+    }
+
+    public function addValidator(string $type, string $name, callable $fn)
+    {
+        $name = 'validate' . ucfirst($name);
+        $this->customValidators[$type][$name] = $fn;
+    }
+
+    public function test($name, $value)
+    {
+        $this->config->set($name, $value);
+        return $this;
     }
 
     public function required()
@@ -53,10 +80,22 @@ class Validator
             array_keys($config)
         );
 
+        $class_methods = get_class_methods($this);
+        $custom_methods = array_diff($methods, $class_methods);
+        $base_methods = array_diff($methods, $custom_methods);
+
         $exec = array_map(
-            fn ($method) => $this->$method($data),
-            $methods
+            fn ($method) => $this->customValidators[$method](
+                $data,
+                $config[lcfirst(str_replace('validate', '', $method))]
+            ),
+            $custom_methods
         );
+
+        $exec = array_merge($exec, array_map(
+            fn ($method) => $this->$method($data),
+            $base_methods
+        ));
 
         return !in_array(false, $exec);
     }
