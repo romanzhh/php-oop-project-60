@@ -22,7 +22,7 @@ class NumberValidator extends Validator
         return $number >= $from && $number <= $to;
     }
 
-    public function validatePositive(int $number): bool
+    public function validatePositive(?int $number): bool
     {
         if ($this->config->get('required') && $number <= 0) {
             return false;
