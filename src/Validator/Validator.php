@@ -21,6 +21,7 @@ class Validator
     {
         $this->customValidators = $customValidators ?? [];
         $this->config = $config ?? new ValidatorConfig();
+        $this->config->set('required', false);
     }
 
     public function string()
@@ -64,7 +65,7 @@ class Validator
 
     public function validateRequired($data): bool
     {
-        return !empty($data);
+        return $this->config->get('required') ? !empty($data) : true;
     }
 
     public function isValid($data): bool

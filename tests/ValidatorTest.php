@@ -49,7 +49,7 @@ class ValidatorTest extends TestCase
         ];
         $schema->shape($shape);
         $this->assertTrue($schema->isValid(['name' => 'kolya', 'age' => 100]));
-        $this->assertFalse($schema->isValid(['name' => 'maya', 'age' => null]));
+        $this->assertTrue($schema->isValid(['name' => 'maya', 'age' => null]));
         $this->assertFalse($schema->isValid(['name' => '', 'age' => null]));
         $this->assertFalse($schema->isValid(['name' => 'ada', 'age' => -5]));
     }

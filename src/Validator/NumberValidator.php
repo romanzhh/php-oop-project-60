@@ -24,6 +24,14 @@ class NumberValidator extends Validator
 
     public function validatePositive($number)
     {
-        return $number > 0;
+        if ($this->config->get('required') && $number <= 0) {
+            return false;
+        }
+
+        if (!is_null(($number)) && $number <= 0) {
+            return false;
+        }
+
+        return true;
     }
 }
