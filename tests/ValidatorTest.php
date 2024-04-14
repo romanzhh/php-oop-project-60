@@ -33,10 +33,15 @@ class ValidatorTest extends TestCase
 
     public function testArrayValidator(): void
     {
-        $validator = new Validator();
+        $validator = new \Hexlet\Validator\Validator();
         $schema = $validator->array();
-        $this->assertTrue($schema->required()->sizeof(3)->isValid([1, 2, 3]));
-        $this->assertFalse($schema->sizeof(3)->isValid([1, 2]));
+        $this->assertTrue($schema->isValid(null));
+        $schema = $schema->required();
+        $this->assertTrue($schema->isValid([]));
+        $this->assertTrue($schema->isValid(['hexlet']));
+        $schema->sizeof(2);
+        $this->assertFalse($schema->isValid(['hexlet']));
+        $this->assertTrue($schema->isValid(['hexlet', 'code-basics']));
     }
 
     public function testShapeValidator(): void
