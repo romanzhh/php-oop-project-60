@@ -4,23 +4,23 @@ namespace Hexlet\Validator;
 
 class ArrayValidator extends Validator
 {
-    public function shape(array $array)
+    public function shape(array $array): void
     {
         $this->config->set('shape', $array);
     }
 
-    public function sizeof(int $size)
+    public function sizeof(int $size): \Hexlet\Validator\ArrayValidator
     {
         $this->config->set('size', $size);
         return $this;
     }
 
-    public function validateSize($array)
+    public function validateSize(array $array): bool
     {
         return sizeof($array) === $this->config->get('size');
     }
 
-    public function validateRequired($data): bool
+    public function validateRequired(mixed $data): bool
     {
         return $this->config->get('required') ? is_array($data) : true;
     }
