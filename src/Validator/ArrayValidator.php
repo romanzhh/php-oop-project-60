@@ -22,7 +22,7 @@ class ArrayValidator extends Validator
 
     public function validateRequired(mixed $data): bool
     {
-        return ($this->config->get('required') && !is_array($data)) ? false : true;
+        return ((bool) $this->config->get('required') && !is_array($data)) ? false : true;
     }
 
     public function validateShape(array $array): bool

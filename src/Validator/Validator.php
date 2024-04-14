@@ -70,14 +70,14 @@ class Validator
 
     public function validateRequired(mixed $data): bool
     {
-        return $this->config->get('required') ? (bool) $data : true;
+        return (bool) $this->config->get('required') ? (bool) $data : true;
     }
 
     public function isValid(mixed $data): bool
     {
         $config = $this->config->all();
 
-        if (empty($config)) {
+        if (!count($config)) {
             return true;
         }
 
@@ -99,10 +99,10 @@ class Validator
         );
 
         $exec = array_merge($exec, array_map(
-            fn ($method) => $this->$method($data),
+            fn ($method) => call_user_func([$this, $method], $data),
             $base_methods
         ));
 
-        return !in_array(false, $exec, false);
+        return !in_array(false, $exec, true);
     }
 }
