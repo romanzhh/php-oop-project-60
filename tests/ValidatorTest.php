@@ -21,7 +21,14 @@ class ValidatorTest extends TestCase
     {
         $validator = new Validator();
         $schema = $validator->number();
-        $this->assertTrue($schema->isValid(3));
+        $this->assertTrue($schema->isValid(null));
+        $schema->required();
+        $this->assertFalse($schema->isValid(null));
+        $this->assertTrue($schema->isValid(7));
+        $this->assertTrue($schema->positive()->isValid(10));
+        $schema->range(-5, 5);
+        $this->assertFalse($schema->isValid(-3));
+        $this->assertTrue($schema->isValid(5));
     }
 
     public function testArrayValidator(): void
