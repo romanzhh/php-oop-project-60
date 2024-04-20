@@ -16,11 +16,11 @@ class StringValidator extends Validator
         return $this;
     }
 
-    public function isValid(mixed $data): bool
+    public function isValid(string $str): bool
     {
         $config = $this->config->all();
 
-        if (empty($config)) {
+        if (count($config) === 0) {
             return true;
         }
 
@@ -29,21 +29,21 @@ class StringValidator extends Validator
         foreach ($config as $key => $value) {
             switch ($key) {
                 case 'required':
-                    $executions[] = $value ? !empty($data) : true;
+                    $executions[] = $value ? strlen($str) !== 0 : true;
                     break;
                 case 'minLength':
-                    $executions[] = strlen($data ?? '') >= $value;
+                    $executions[] = strlen($str) >= $value;
                     break;
                 case 'contains':
-                    $executions[] = str_contains($data ?? '', $value);
+                    $executions[] = str_contains($str, $value);
                     break;
                 default:
                     $customValidator = $this->customValidators->getByName($key);
-                    $executions[] = $customValidator->call($data, $value);
+                    $executions[] = $customValidator->call($str, $value);
                     break;
             }
         }
 
-        return !in_array(false, $executions);
+        return !in_array(false, $executions, true);
     }
 }

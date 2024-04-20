@@ -33,7 +33,7 @@ class ArrayValidator extends Validator
     {
         $config = $this->config->all();
 
-        if (empty($config)) {
+        if (!count($config)) {
             return true;
         }
 
@@ -57,6 +57,6 @@ class ArrayValidator extends Validator
             }
         }
 
-        return !in_array(false, $executions);
+        return !in_array(false, $executions, true);
     }
 }

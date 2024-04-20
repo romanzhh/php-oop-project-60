@@ -20,7 +20,7 @@ class NumberValidator extends Validator
     {
         $config = $this->config->all();
 
-        if (empty($config)) {
+        if (count($config) === 0) {
             return true;
         }
 
@@ -46,6 +46,6 @@ class NumberValidator extends Validator
             }
         }
 
-        return !in_array(false, $executions);
+        return !in_array(false, $executions, true);
     }
 }
