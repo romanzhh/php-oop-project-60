@@ -16,7 +16,7 @@ class NumberValidator extends Validator
         return $this;
     }
 
-    public function isValid(mixed $data): bool
+    public function isValid(?int $number): bool
     {
         $config = $this->config->all();
 
@@ -29,19 +29,19 @@ class NumberValidator extends Validator
         foreach ($config as $key => $value) {
             switch ($key) {
                 case 'required':
-                    $executions[] = $value ? is_int($data) : true;
+                    $executions[] = $value ? is_int($number) : true;
                     break;
                 case 'range':
                     [$from, $to] = $value;
-                    $executions[] = $data >= $from && $data <= $to;
+                    $executions[] = $number >= $from && $number <= $to;
                     break;
                 case 'positive':
                     $required = $config['required'] ?? false;
-                    $executions[] = $required ? $data > 0 : is_null($data) || $data > 0;
+                    $executions[] = $required ? $number > 0 : is_null($number) || $number > 0;
                     break;
                 default:
                     $customValidator = $this->customValidators->getByName($key);
-                    $executions[] = $customValidator->call($data, $value);
+                    $executions[] = $customValidator->call($number, $value);
                     break;
             }
         }

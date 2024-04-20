@@ -29,11 +29,11 @@ class ArrayValidator extends Validator
         return true;
     }
 
-    public function isValid(mixed $data): bool
+    public function isValid(?array $array): bool
     {
         $config = $this->config->all();
 
-        if (!count($config)) {
+        if (count($config) === 0) {
             return true;
         }
 
@@ -42,17 +42,17 @@ class ArrayValidator extends Validator
         foreach ($config as $key => $value) {
             switch ($key) {
                 case 'required':
-                    $executions[] = $value ? is_array($data) : true;
+                    $executions[] = $value ? is_array($array) : true;
                     break;
                 case 'size':
-                    $executions[] = sizeof($data ?? []) === $value;
+                    $executions[] = sizeof($array ?? []) === $value;
                     break;
                 case 'shape':
-                    $executions[] = $this->validateShape($data ?? []);
+                    $executions[] = $this->validateShape($array ?? []);
                     break;
                 default:
                     $customValidator = $this->customValidators->getByName($key);
-                    $executions[] = $customValidator->call($data, $value);
+                    $executions[] = $customValidator->call($array, $value);
                     break;
             }
         }

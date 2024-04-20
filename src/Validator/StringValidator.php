@@ -16,13 +16,15 @@ class StringValidator extends Validator
         return $this;
     }
 
-    public function isValid(string $str): bool
+    public function isValid(?string $str): bool
     {
         $config = $this->config->all();
 
         if (count($config) === 0) {
             return true;
         }
+
+        $str = $str ?? '';
 
         $executions = [];
 
