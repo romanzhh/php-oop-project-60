@@ -7,7 +7,7 @@ class ValidatorConfig
     /**
      * @var array
      */
-    protected $data;
+    protected $data = [];
 
     public function set(string $key, mixed $value): void
     {

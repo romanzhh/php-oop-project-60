@@ -16,13 +16,34 @@ class StringValidator extends Validator
         return $this;
     }
 
-    public function validateMinLength(string $str): bool
+    public function isValid(mixed $data): bool
     {
-        return strlen($str) >= $this->config->get('minLength');
-    }
+        $config = $this->config->all();
 
-    public function validateContains(string $str): bool
-    {
-        return str_contains($str, $this->config->get('contains'));
+        if (empty($config)) {
+            return true;
+        }
+
+        $executions = [];
+
+        foreach ($config as $key => $value) {
+            switch ($key) {
+                case 'required':
+                    $executions[] = $value ? !empty($data) : true;
+                    break;
+                case 'minLength':
+                    $executions[] = strlen($data ?? '') >= $value;
+                    break;
+                case 'contains':
+                    $executions[] = str_contains($data ?? '', $value);
+                    break;
+                default:
+                    $customValidator = $this->customValidators->getByName($key);
+                    $executions[] = $customValidator->call($data, $value);
+                    break;
+            }
+        }
+
+        return !in_array(false, $executions);
     }
 }

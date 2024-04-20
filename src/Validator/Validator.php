@@ -2,58 +2,39 @@
 
 namespace Hexlet\Validator;
 
+use Closure;
+
 class Validator
 {
-    public const STRING_TYPE = 'string';
+    protected ValidatorConfig $config;
 
-    public const NUMBER_TYPE = 'number';
+    protected CustomValidators $customValidators;
 
-    public const ARRAY_TYPE = 'array';
-
-    /**
-     * @var ValidatorConfig
-     */
-    protected $config;
-
-    /**
-     * @var array
-     */
-    protected $customValidators;
-
-    public function __construct(
-        array $customValidators = null,
-        ValidatorConfig $config = null
-    ) {
-        $this->customValidators = $customValidators ?? [];
+    public function __construct(CustomValidators $customValidators = null, ValidatorConfig $config = null)
+    {
+        $this->customValidators = $customValidators ?? new CustomValidators();
         $this->config = $config ?? new ValidatorConfig();
-        $this->config->set('required', false);
     }
 
     public function string(): StringValidator
     {
-        return new StringValidator(
-            $this->customValidators[self::STRING_TYPE] ?? []
-        );
+        return new StringValidator($this->customValidators->forString());
     }
 
     public function number(): NumberValidator
     {
-        return new NumberValidator(
-            $this->customValidators[self::NUMBER_TYPE] ?? []
-        );
+        return new NumberValidator($this->customValidators->forNumber());
     }
 
     public function array(): ArrayValidator
     {
-        return new ArrayValidator(
-            $this->customValidators[self::ARRAY_TYPE] ?? []
-        );
+        return new ArrayValidator($this->customValidators->forArray());
     }
 
-    public function addValidator(string $type, string $name, callable $fn): void
+    public function addValidator(string $type, string $name, Closure $fn): void
     {
-        $name = 'validate' . ucfirst($name);
-        $this->customValidators[$type][$name] = $fn;
+        $customValidator = new CustomValidator($type, $name, $fn);
+        $this->customValidators->push($customValidator);
     }
 
     public function test(string $name, mixed $value): static
@@ -66,43 +47,5 @@ class Validator
     {
         $this->config->set('required', true);
         return $this;
-    }
-
-    public function validateRequired(mixed $data): bool
-    {
-        return (bool) $this->config->get('required') ? (bool) $data : true;
-    }
-
-    public function isValid(mixed $data): bool
-    {
-        $config = $this->config->all();
-
-        if (!count($config)) {
-            return true;
-        }
-
-        $methods = array_map(
-            fn ($name) => ('validate' . ucfirst($name)),
-            array_keys($config)
-        );
-
-        $class_methods = get_class_methods($this);
-        $custom_methods = array_diff($methods, $class_methods);
-        $base_methods = array_diff($methods, $custom_methods);
-
-        $exec = array_map(
-            fn ($method) => $this->customValidators[$method](
-                $data,
-                $config[lcfirst(str_replace('validate', '', $method))]
-            ),
-            $custom_methods
-        );
-
-        $exec = array_merge($exec, array_map(
-            fn ($method) => call_user_func([$this, $method], $data),
-            $base_methods
-        ));
-
-        return !in_array(false, $exec, true);
     }
 }

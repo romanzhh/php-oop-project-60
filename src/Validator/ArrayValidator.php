@@ -15,16 +15,6 @@ class ArrayValidator extends Validator
         return $this;
     }
 
-    public function validateSize(array $array): bool
-    {
-        return sizeof($array) === $this->config->get('size');
-    }
-
-    public function validateRequired(mixed $data): bool
-    {
-        return ((bool) $this->config->get('required') && !is_array($data)) ? false : true;
-    }
-
     public function validateShape(array $array): bool
     {
         $shape = $this->config->get('shape');
@@ -37,5 +27,36 @@ class ArrayValidator extends Validator
         }
 
         return true;
+    }
+
+    public function isValid(mixed $data): bool
+    {
+        $config = $this->config->all();
+
+        if (empty($config)) {
+            return true;
+        }
+
+        $executions = [];
+
+        foreach ($config as $key => $value) {
+            switch ($key) {
+                case 'required':
+                    $executions[] = $value ? is_array($data) : true;
+                    break;
+                case 'size':
+                    $executions[] = sizeof($data ?? []) === $value;
+                    break;
+                case 'shape':
+                    $executions[] = $this->validateShape($data ?? []);
+                    break;
+                default:
+                    $customValidator = $this->customValidators->getByName($key);
+                    $executions[] = $customValidator->call($data, $value);
+                    break;
+            }
+        }
+
+        return !in_array(false, $executions);
     }
 }

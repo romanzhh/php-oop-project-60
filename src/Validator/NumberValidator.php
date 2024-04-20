@@ -16,14 +16,36 @@ class NumberValidator extends Validator
         return $this;
     }
 
-    public function validateRange(int $number): bool
+    public function isValid(mixed $data): bool
     {
-        [$from, $to] = $this->config->get('range');
-        return $number >= $from && $number <= $to;
-    }
+        $config = $this->config->all();
 
-    public function validatePositive(?int $number): bool
-    {
-        return (!is_null($number) && $number <= 0) ? false : true;
+        if (empty($config)) {
+            return true;
+        }
+
+        $executions = [];
+
+        foreach ($config as $key => $value) {
+            switch ($key) {
+                case 'required':
+                    $executions[] = $value ? is_int($data) : true;
+                    break;
+                case 'range':
+                    [$from, $to] = $value;
+                    $executions[] = $data >= $from && $data <= $to;
+                    break;
+                case 'positive':
+                    $required = $config['required'] ?? false;
+                    $executions[] = $required ? $data > 0 : is_null($data) || $data > 0;
+                    break;
+                default:
+                    $customValidator = $this->customValidators->getByName($key);
+                    $executions[] = $customValidator->call($data, $value);
+                    break;
+            }
+        }
+
+        return !in_array(false, $executions);
     }
 }
